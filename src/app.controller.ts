@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, UserModel } from './entity/user.entity';
 import { Repository } from 'typeorm';
@@ -29,10 +29,11 @@ export default class AppController {
   @Get('users')
   getUser() {
     return this.userRepository.find({
-      relations: {
-        profile: true,
-        posts: true,
-      },
+      //userModel에서 profile에 대해서 eager:true했으니 자동으로 relation되어 가져옴
+      // relations: {
+      //   profile: true,
+      //   posts: true,
+      // },
     });
   }
 
@@ -49,16 +50,25 @@ export default class AppController {
     });
   }
 
+  @Delete('user/profile/:id')
+  async deleteProfile(@Param('id') id: string) {
+    await this.profileRepository.delete(+id);
+  }
+
   @Post('user/profile')
   async createUserAndProfile() {
     const user = await this.userRepository.save({
       email: 'cocobell3@naver.com',
+      //cascade:true로 설정해두었기 때문에 한번에 저정 가능하다
+      profile: {
+        profileImg: 'asdf.jpg',
+      },
     });
     console.log(user);
-    await this.profileRepository.save({
-      profileImg: 'asdf.jpg',
-      user,
-    });
+    // const profile = await this.profileRepository.save({
+    //   profileImg: 'asdf.jpg',
+    //   user,
+    // });
     return user;
   }
 
