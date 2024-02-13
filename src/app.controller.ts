@@ -34,6 +34,39 @@ export default class AppController {
       //   profile: true,
       //   posts: true,
       // },
+      //===============
+      //FindManyOptions 파라미터 알아보기
+      //1)select
+      //어떤 프로퍼티를 선택할지
+      //기본은 모든 프로퍼티를 가져온다(만약에 Select를 정의하지 않으면)
+      //select를 정의하면..?
+      select: {
+        id: true,
+        createdAt: true,
+        version: true,
+        updateAt: true,
+        profile: { id: true },
+      },
+      //id만 가져옴
+      //select:{}이렇게 해서 아무값도 넣지 않으면 그냥 다 가져옴
+      //==============
+      //2)where
+      //where안의 것들은 전부 and조건으로!!!
+      // where: { version: 1, id: 1 },
+      //만약 or조건으로 넣고 싶다면 배열로!!
+      // where: [{ version: 1 }, { id: 1 }, { profile: { id: 3 } }],
+      //3) 관계를 가져오는 법
+      relations: { profile: true },
+      //4) 오름차순, 내림차순
+      //ASC-> 오름차
+      //DESC-> 내림차
+      order: {
+        id: 'DESC',
+      },
+      //5) order후 처음 몇개를 제외할 지
+      skip: 0,
+      //6) take몇개를 가져올지(default(0)는 테이블에 있는것들 전부 다)
+      take: 0,
     });
   }
 
