@@ -4,6 +4,7 @@ import { Role, UserModel } from './entity/user.entity';
 import { Repository } from 'typeorm';
 import { ProfileModel } from './entity/profile.entity';
 import { PostModel } from './entity/post.entity';
+import { TagModel } from './entity/tag.entity';
 
 @Controller()
 export default class AppController {
@@ -14,6 +15,8 @@ export default class AppController {
     private readonly profileRepository: Repository<ProfileModel>,
     @InjectRepository(PostModel)
     private readonly postRepository: Repository<PostModel>,
+    @InjectRepository(TagModel)
+    private readonly tagRepository: Repository<TagModel>,
   ) {}
 
   @Post('users')
@@ -52,7 +55,7 @@ export default class AppController {
       email: 'cocobell3@naver.com',
     });
     console.log(user);
-    const profile = await this.profileRepository.save({
+    await this.profileRepository.save({
       profileImg: 'asdf.jpg',
       user,
     });
@@ -73,5 +76,42 @@ export default class AppController {
       author: user,
     });
     return user;
+  }
+
+  @Post('posts/tag')
+  async createPostTags() {
+    const post1 = await this.postRepository.save({
+      title: 'NestJs Lecture',
+    });
+    const post2 = await this.postRepository.save({
+      title: 'Programming Lecture',
+    });
+    const tag1 = await this.tagRepository.save({
+      name: 'JavaScript',
+      posts: [post1, post2],
+    });
+    const tag2 = await this.tagRepository.save({
+      name: 'TypeScript',
+      posts: [post1],
+    });
+    const post3 = await this.postRepository.save({
+      title: 'NextJS Lecture',
+      tags: [tag1, tag2],
+    });
+    return true;
+  }
+  @Get('posts')
+  getPosts() {
+    return this.postRepository.find({
+      relations: {
+        tags: true,
+      },
+    });
+  }
+  @Get('tags')
+  getTags() {
+    return this.tagRepository.find({
+      relations: { posts: true },
+    });
   }
 }
