@@ -31,7 +31,89 @@ export default class AppController {
     @InjectRepository(TagModel)
     private readonly tagRepository: Repository<TagModel>,
   ) {}
+  @Post('sample')
+  async sample() {
+    //모델에 해당되는 객체 생성-저장은 안함(리턴하면 값을 받아볼 수는 있지만 db에 저장은 안됨)
+    const user1 = this.userRepository.create({
+      email: 'test@codefactory.ai',
+    });
 
+    //저장
+    const user2 = this.userRepository.save({ email: 'test@codefactory.ai' });
+    // return user2;
+
+    //preload
+    //입력된 값을 기반으로 데이터베이스에 있는 데이터를 불러오고
+    //추가 입력된 값으로 데이터베이스에서 가져온 값들을 대체함
+    //저장하지는않음(뭐랄까 find와 create가 섞인 상태??)
+    const user3 = await this.userRepository.preload({
+      id: 101,
+      email: 'codefactory@codefactory.ai',
+    });
+    //return user3;
+
+    //삭제하기
+    // await this.userRepository.delete(101);
+
+    //id가 2인 row의 count를 2씩 증가
+    // const user4 = await this.userRepository.increment(
+    //   {
+    //     id: 2,
+    //   },
+    //   'count',
+    //   2,
+    // );
+    // return user4;
+
+    //감소시키기
+    // const user5 = await this.userRepository.decrement(
+    //   {
+    //     id: 2,
+    //   },
+    //   'count',
+    //   3,
+    // );
+    // return user5;
+
+    //갯수 카운팅하기
+    // const count = await this.userRepository.count({
+    //   where: {
+    //     email: ILike(`%0%`),
+    //   },
+    // });
+    // return count;
+
+    //sum (0을 포함하는 모든 row의 count의 합계)
+    // const sum = await this.userRepository.sum('count', {
+    //   email: ILike('%0%'),
+    // });
+    // return sum;
+
+    //평균
+    // const average = await this.userRepository.average('count', {
+    //   id: LessThan(4),
+    // });
+    // return average;
+
+    //최솟값 count가 가장 작은 Row의 count 값
+    // const min = await this.userRepository.minimum('count', {
+    //   id: LessThan(4),
+    // });
+    // return min;
+
+    //최댓값
+    // const max = await this.userRepository.maximum('count', {
+    //   id: LessThan(4),
+    // });
+    // return max;
+
+    //페이지 네이션 기초
+    //배열의 마지막에 숫자가 옴-> 전체에 해당되는 갯수임!!
+    const usersAndCount = await this.userRepository.findAndCount({
+      take: 3,
+    });
+    return usersAndCount;
+  }
   @Post('users')
   async postUser() {
     for (let i = 0; i < 100; i++) {
