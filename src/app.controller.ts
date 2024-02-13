@@ -1,7 +1,20 @@
 import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, UserModel } from './entity/user.entity';
-import { Repository } from 'typeorm';
+import {
+  Between,
+  Equal,
+  ILike,
+  In,
+  IsNull,
+  LessThan,
+  LessThanOrEqual,
+  Like,
+  MoreThan,
+  MoreThanOrEqual,
+  Not,
+  Repository,
+} from 'typeorm';
 import { ProfileModel } from './entity/profile.entity';
 import { PostModel } from './entity/post.entity';
 import { TagModel } from './entity/tag.entity';
@@ -20,14 +33,16 @@ export default class AppController {
   ) {}
 
   @Post('users')
-  postUser() {
-    return this.userRepository.save({
-      role: Role.ADMIN,
-    });
+  async postUser() {
+    for (let i = 0; i < 100; i++) {
+      await this.userRepository.save({
+        email: `user-${i}@google.com`,
+      });
+    }
   }
 
   @Get('users')
-  getUser() {
+  getUsers() {
     return this.userRepository.find({
       //userModel에서 profile에 대해서 eager:true했으니 자동으로 relation되어 가져옴
       // relations: {
@@ -40,13 +55,13 @@ export default class AppController {
       //어떤 프로퍼티를 선택할지
       //기본은 모든 프로퍼티를 가져온다(만약에 Select를 정의하지 않으면)
       //select를 정의하면..?
-      select: {
-        id: true,
-        createdAt: true,
-        version: true,
-        updateAt: true,
-        profile: { id: true },
-      },
+      // select: {
+      //   id: true,
+      //   createdAt: true,
+      //   version: true,
+      //   updateAt: true,
+      //   profile: { id: true },
+      // },
       //id만 가져옴
       //select:{}이렇게 해서 아무값도 넣지 않으면 그냥 다 가져옴
       //==============
@@ -55,18 +70,42 @@ export default class AppController {
       // where: { version: 1, id: 1 },
       //만약 or조건으로 넣고 싶다면 배열로!!
       // where: [{ version: 1 }, { id: 1 }, { profile: { id: 3 } }],
+      where: {
+        //id가 1이 아닌 경우 가져오기
+        // id: Not(1),
+        //id가 30보다 적은경우 가져오기
+        // id: LessThan(30),
+        //30보다 작거나 같은 경우
+        // id: LessThanOrEqual(30),
+        //30보다 큰 경우
+        // id: MoreThan(30),
+        //30과 같거나 큰 경우
+        // id: MoreThanOrEqual(30),
+        //같은 경우: 그냥 30을 넣는거나 다를 바가 없음
+        // id: Equal(30),
+        //유사값 가져오기(google이라는 글자가 들어가 있으면 앞뒤로 어떤글자가 와도 상관없음)
+        // email: Like('%google%'),
+        //대문자 소문자 구분 안하는 유사값
+        // email: ILike('%gooGLe%'),
+        //사이값(10부터 15까지의 값 필터링)
+        // id: Between(10, 15),
+        //해당되는 여러개의 값
+        // id: In([1, 3, 5, 7, 9]),
+        //isNull null인것들 가져오기
+        // id: IsNull(),
+      },
       //3) 관계를 가져오는 법
-      relations: { profile: true },
+      // relations: { profile: true },
       //4) 오름차순, 내림차순
       //ASC-> 오름차
       //DESC-> 내림차
-      order: {
-        id: 'DESC',
-      },
+      // order: {
+      //   id: 'DESC',
+      // },
       //5) order후 처음 몇개를 제외할 지
-      skip: 0,
+      // skip: 0,
       //6) take몇개를 가져올지(default(0)는 테이블에 있는것들 전부 다)
-      take: 0,
+      // take: 0,
     });
   }
 
